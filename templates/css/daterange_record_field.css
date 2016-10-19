@@ -1,0 +1,27 @@
+div.date_range {
+	display:inline-block;
+	min-width: 150px;
+}
+
+div.date_field {
+	display:inline-block;
+	height: 48%;
+
+}
+
+div.left_date_field {
+	border-right: 1px solid black;
+	padding-right: 3px;
+	margin-right: 0;
+	width: 55%;
+}
+
+div.right_date_field {
+
+	padding-left: 3px;
+	width: 35%;
+}
+
+div.top_date_field {
+	border-bottom: 1px solid black;
+}

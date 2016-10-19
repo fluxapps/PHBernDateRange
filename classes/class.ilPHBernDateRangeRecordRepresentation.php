@@ -12,14 +12,21 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 	public function getHTML($link = true) {
 		global $DIC;
 		$ilUser = $DIC['ilUser'];
-
+		$tpl = $DIC['tpl'];
 		$value = $this->getRecordField()->getValue();
-		if ($value == '0000-00-00 00:00:00' OR !$value) {
-			return $this->lng->txt('no_date');
+		$template = new ilTemplate("tpl.daterange_record_field.html", true, true, ilPHBernDateRangePlugin::getInstance()->getDirectory());
+		$css = ilPHBernDateRangePlugin::getInstance()->getDirectory()."/templates/css/daterange_record_field.css";
+		$tpl->addCss(ilPHBernDateRangePlugin::getInstance()->getDirectory()."/templates/css/daterange_record_field.css");
+		$dates = $this->formatDateTimes($value);
+		foreach ($dates as $key => $value) {
+			$template->setVariable($key, $value);
 		}
-		$html = $this->formatDateTimes($value);
-		return $html;
+		return $template->get();
 	}
+
+
+
+
 
 	/**
 	 * @param $value
@@ -58,7 +65,7 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 
 		// no time
 		if (strlen($values['start']) < 11) {
-			return $date_from . '<br>' . $date_to;
+			return array('DATE_FROM' => $date_from, 'TIME_FROM' => '-', 'DATE_TO' => $date_to, 'TIME_TO' => '-');
 		}
 
 		switch($user_timeformat)
@@ -74,10 +81,10 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 		$time_from = date($timeformat, $timestamp_from);
 		$time_to = date($timeformat, $timestamp_to);
 		if ($date_from == $date_to) {
-			return $date_from . '<br>' . $time_from . ' - ' . $time_to;
+			$date_to = "&nbsp";
 		}
 
-		return $date_from . ' ' . $time_from . '<br>' . $date_to . ' ' . $time_to;
+		return array('DATE_FROM' => $date_from, 'TIME_FROM' => $time_from, 'DATE_TO' => $date_to, 'TIME_TO' => $time_to);
 
 //		return $this->lng->txt('no_date');
 	}
@@ -88,5 +95,26 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 			return NULL;
 		}
 		return $value;
+	}
+
+	/**
+	 * Fills the form with the value of a record
+	 * @param $form
+	 */
+	public function fillFormInput($form) {
+		/** @var ilDateDurationInputGUI $input_field */
+		$input_field = $form->getItemByPostVar('field_'.$this->getRecordField()->getField()->getId());
+		if($input_field) {
+			$value = $this->getFormInput();
+			// without time
+			if (strlen($value['start']) < 11) {
+				$input_field->enableToggleFullTime(ilPHBernDateRangePlugin::getInstance()->txt('whole_day'), true);
+				$input_field->setShowTime(false);
+			} else {
+				$input_field->enableToggleFullTime(ilPHBernDateRangePlugin::getInstance()->txt('whole_day'), false);
+			}
+			$input_field->setValueByArray(array("field_".$this->getRecordField()->getField()->getId() => $value));
+			$input_field->setShowTime(true);
+		}
 	}
 }
