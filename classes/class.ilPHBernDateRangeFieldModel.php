@@ -19,5 +19,33 @@ class ilPHBernDateRangeFieldModel extends ilDclDatetimeFieldModel {
 	}
 
 
+	/**
+	 * @param string                   $filter_value
+	 * @param ilDclBaseFieldModel|NULL $sort_field
+	 *
+	 * @return ilDclRecordQueryObject
+	 */
+	public function getRecordQueryFilterObject($filter_value = "", ilDclBaseFieldModel $sort_field = NULL) {
+		global $DIC;
+		$ilDB = $DIC['ilDB'];
 
+		$date_from = (isset($filter_value['from']) && is_object($filter_value['from'])) ? $filter_value['from'] : NULL;
+		$date_to = (isset($filter_value['to']) && is_object($filter_value['to'])) ? $filter_value['to'] : NULL;
+
+		$join_str = "INNER JOIN il_dcl_record_field AS filter_record_field_{$this->getId()} ON (filter_record_field_{$this->getId()}.record_id = record.id AND filter_record_field_{$this->getId()}.field_id = "
+			. $ilDB->quote($this->getId(), 'integer') . ") ";
+		$join_str .= "INNER JOIN il_dcl_stloc{$this->getStorageLocation()}_value AS filter_stloc_{$this->getId()} ON (filter_stloc_{$this->getId()}.record_field_id = filter_record_field_{$this->getId()}.id ";
+		if ($date_from) {
+			$join_str .= "AND UNIX_TIMESTAMP(SUBSTRING(filter_stloc_{$this->getId()}.value,11,10)) >= " . $ilDB->quote($date_from->getUnixTime(), 'integer') . " ";
+		}
+		if ($date_to) {
+			$join_str .= "AND UNIX_TIMESTAMP(SUBSTRING(filter_stloc_{$this->getId()}.value,11,10)) <= " . $ilDB->quote($date_to->getUnixTime(), 'integer') . " ";
+		}
+		$join_str .= ") ";
+
+		$sql_obj = new ilDclRecordQueryObject();
+		$sql_obj->setJoinStatement($join_str);
+
+		return $sql_obj;
+	}
 }
