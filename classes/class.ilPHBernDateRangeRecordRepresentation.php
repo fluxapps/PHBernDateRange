@@ -66,7 +66,11 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 
 		// no time
 		if (strlen($values['start']) < 11) {
-			return array('DATE_FROM' => $date_from, 'TIME_FROM' => '-', 'DATE_TO' => $date_to, 'TIME_TO' => '-');
+			return array(
+				'DATE_FROM' => $date_from,
+				'TIME_FROM' => '-',
+				'DATE_TO' => ($date_from == $date_to ? ilPHBernDateRangePlugin::getInstance()->txt('whole_day') : $date_to),
+				'TIME_TO' => '-');
 		}
 
 		switch($user_timeformat)
