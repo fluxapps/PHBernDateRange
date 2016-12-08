@@ -9,12 +9,18 @@ require_once "Modules/DataCollection/classes/Fields/Datetime/class.ilDclDatetime
 class ilPHBernDateRangeFieldModel extends ilDclDatetimeFieldModel {
 
 	/**
+	 * @var ilDclFieldTypePlugin
+	 */
+	protected $pl;
+
+	/**
 	 * ilPHBernDateRangeFieldModel constructor.
 	 *
 	 * @param int $a_id
 	 */
 	public function __construct($a_id = 0) {
 		parent::__construct($a_id);
+		$this->pl = ilPHBernDateRangePlugin::getInstance();
 		$this->setStorageLocationOverride(1);
 	}
 
@@ -47,5 +53,34 @@ class ilPHBernDateRangeFieldModel extends ilDclDatetimeFieldModel {
 		$sql_obj->setJoinStatement($join_str);
 
 		return $sql_obj;
+	}
+
+
+	/**
+	 * @param ilExcel $worksheet
+	 * @param         $row
+	 * @param         $col
+	 */
+	public function fillHeaderExcel(ilExcel $worksheet, &$row, &$col) {
+		$worksheet->setCell($row, $col, $this->getTitle() . ' ' . $this->pl->txt('from'));
+		$col++;
+		$worksheet->setCell($row, $col, $this->getTitle() . ' ' . $this->pl->txt('to'));
+		$col++;
+	}
+
+
+	/**
+	 * @param array $titles
+	 * @param array $import_fields
+	 */
+	public function checkTitlesForImport(array &$titles, array &$import_fields) {
+		foreach ($titles as $k => $title) {
+			if (($this->getTitle() . ' ' . $this->pl->txt('from')) == $title) {
+				$import_fields[$k] = $this;
+				if ($titles[$k+1] == ($this->getTitle() . ' ' . $this->pl->txt('to'))) {
+					unset($titles[$k+1]);
+				}
+			}
+		}
 	}
 }
