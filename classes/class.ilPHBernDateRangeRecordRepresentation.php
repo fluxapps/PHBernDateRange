@@ -19,8 +19,14 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 			return '';
 		}
 		$dates = $this->formatDateTimes($value);
+		if ($dates['BOTTOM_LEFT'] || $dates['BOTTOM_RIGHT']) {
+			$template = new ilTemplate("tpl.daterange_record_field.html", true, true, ilPHBernDateRangePlugin::getInstance()->getDirectory());
+		} else {
+			$template = new ilTemplate("tpl.daterange_record_field_single_day.html", true, true, ilPHBernDateRangePlugin::getInstance()->getDirectory());
+		}
+
 		foreach ($dates as $key => $value) {
-			$template->setVariable($key, $value);
+			$template->setVariable($key, $value ? $value : '&nbsp');
 		}
 		return $template->get();
 	}
@@ -67,29 +73,37 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 		// no time
 		if (strlen($values['start']) < 11) {
 			return array(
-				'DATE_FROM' => $date_from,
-				'TIME_FROM' => '-',
-				'DATE_TO' => ($date_from == $date_to ? ilPHBernDateRangePlugin::getInstance()->txt('whole_day') : $date_to),
-				'TIME_TO' => '-');
+				'TOP_LEFT' => $date_from,
+				'TOP_RIGHT' => ilPHBernDateRangePlugin::getInstance()->txt('whole_day'),
+				'BOTTOM_LEFT' => ($date_from == $date_to ? false : $date_to),
+				'BOTTOM_RIGHT' => ($date_from == $date_to ? false : ilPHBernDateRangePlugin::getInstance()->txt('whole_day')));
 		}
 
 		switch($user_timeformat)
 		{
 			case ilCalendarSettings::TIME_FORMAT_24:
-				$timeformat = " H:i";
+				$timeformat = "H:i";
 				break;
 			case ilCalendarSettings::TIME_FORMAT_12:
-				$timeformat = " g:ia";
+				$timeformat = "g:ia";
 				break;
 		}
 
 		$time_from = date($timeformat, $timestamp_from);
 		$time_to = date($timeformat, $timestamp_to);
 		if ($date_from == $date_to) {
-			$date_to = "&nbsp";
+			return array(
+				'TOP_LEFT' => $date_from,
+				'TOP_RIGHT' => $time_from . ' - ' . $time_to,
+				'BOTTOM_LEFT' => false,
+				'BOTTOM_RIGHT' => false);
 		}
 
-		return array('DATE_FROM' => $date_from, 'TIME_FROM' => $time_from, 'DATE_TO' => $date_to, 'TIME_TO' => $time_to);
+		return array(
+			'TOP_LEFT' => $date_from,
+			'TOP_RIGHT' => $time_from,
+			'BOTTOM_LEFT' => $date_to,
+			'BOTTOM_RIGHT' => $time_to);
 	}
 
 
