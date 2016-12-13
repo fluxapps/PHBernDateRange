@@ -13,7 +13,6 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 		global $DIC;
 		$tpl = $DIC['tpl'];
 		$value = $this->getRecordField()->getValue();
-		$template = new ilTemplate("tpl.daterange_record_field.html", true, true, ilPHBernDateRangePlugin::getInstance()->getDirectory());
 		$tpl->addCss(ilPHBernDateRangePlugin::getInstance()->getDirectory()."/templates/css/daterange_record_field.css");
 		if ($value === null) {
 			return '';
