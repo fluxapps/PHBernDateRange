@@ -41,33 +41,12 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 	 * @return false|string
 	 */
 	protected function formatDateTimes(array $values) {
-		global $DIC;
-		$ilUser = $DIC['ilUser'];
-
 		if (count($values) != 2) {
 			throw new ilDclException('Wrong number of dates given for fieldtype daterange: should be 2');
 		}
 
-		$user_dateformat = $ilUser->getDateFormat();
-		$user_timeformat = $ilUser->getTimeFormat();
-		$timestamp_from = strtotime($values['start']);
-		$timestamp_to = strtotime($values['end']);
-
-		switch($user_dateformat)
-		{
-			case ilCalendarSettings::DATE_FORMAT_DMY:
-				$dateformat = "d.m.Y";
-				break;
-			case ilCalendarSettings::DATE_FORMAT_YMD:
-				$dateformat = "Y-m-d";
-				break;
-			case ilCalendarSettings::DATE_FORMAT_MDY:
-				$dateformat = "m/d/Y";
-				break;
-		}
-
-		$date_from = date($dateformat, $timestamp_from);
-		$date_to = date($dateformat, $timestamp_to);
+		$date_from = ilPHBernDateRangePlugin::formatDate($values['start']);
+		$date_to = ilPHBernDateRangePlugin::formatDate($values['end']);
 
 		// no time
 		if (strlen($values['start']) < 11) {
@@ -78,18 +57,9 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 				'BOTTOM_RIGHT' => ($date_from == $date_to ? false : ilPHBernDateRangePlugin::getInstance()->txt('whole_day')));
 		}
 
-		switch($user_timeformat)
-		{
-			case ilCalendarSettings::TIME_FORMAT_24:
-				$timeformat = "H:i";
-				break;
-			case ilCalendarSettings::TIME_FORMAT_12:
-				$timeformat = "g:ia";
-				break;
-		}
+		$time_from = ilPHBernDateRangePlugin::formatTime($values['start']);
+		$time_to = ilPHBernDateRangePlugin::formatTime($values['end']);
 
-		$time_from = date($timeformat, $timestamp_from);
-		$time_to = date($timeformat, $timestamp_to);
 		if ($date_from == $date_to) {
 			return array(
 				'TOP_LEFT' => $date_from,

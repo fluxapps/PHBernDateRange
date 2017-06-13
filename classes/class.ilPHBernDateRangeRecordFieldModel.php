@@ -8,6 +8,11 @@ require_once "Modules/DataCollection/classes/Fields/Datetime/class.ilDclDatetime
  */
 class ilPHBernDateRangeRecordFieldModel extends ilDclDatetimeRecordFieldModel {
 
+	/**
+	 * @param ilExcel $worksheet
+	 * @param         $row
+	 * @param         $col
+	 */
 	public function fillExcelExport(ilExcel $worksheet, &$row, &$col) {
 		$value = $this->getValue();
 		$worksheet->setCell($row, $col, $value['start']);
@@ -17,11 +22,24 @@ class ilPHBernDateRangeRecordFieldModel extends ilDclDatetimeRecordFieldModel {
 	}
 
 
+	/**
+	 * @param mixed $value
+	 *
+	 * @return string
+	 */
 	public function parseExportValue($value) {
-		return $value['start'] . ' - ' . $value['end'];
+		return ilPHBernDateRangePlugin::formatDateTime($value['start']) . ' - ' . ilPHBernDateRangePlugin::formatDateTime($value['end']);
 	}
 
 
+
+	/**
+	 * @param $excel
+	 * @param $row
+	 * @param $col
+	 *
+	 * @return array
+	 */
 	public function getValueFromExcel($excel, $row, $col) {
 		$value_from = $excel->getCell($row, $col);
 		$value_to  = $excel->getCell($row, $col+1);
