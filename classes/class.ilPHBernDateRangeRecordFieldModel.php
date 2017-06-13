@@ -9,7 +9,7 @@ require_once "Modules/DataCollection/classes/Fields/Datetime/class.ilDclDatetime
 class ilPHBernDateRangeRecordFieldModel extends ilDclDatetimeRecordFieldModel {
 
 	public function fillExcelExport(ilExcel $worksheet, &$row, &$col) {
-		$value = $this->getExportValue();
+		$value = $this->getValue();
 		$worksheet->setCell($row, $col, $value['start']);
 		$col ++;
 		$worksheet->setCell($row, $col, $value['end']);
@@ -18,7 +18,7 @@ class ilPHBernDateRangeRecordFieldModel extends ilDclDatetimeRecordFieldModel {
 
 
 	public function parseExportValue($value) {
-		return $value;
+		return $value['start'] . ' - ' . $value['end'];
 	}
 
 
