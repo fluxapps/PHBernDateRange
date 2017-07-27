@@ -31,7 +31,7 @@ class ilPHBernDateRangeFieldRepresentation extends ilDclDatetimeFieldRepresentat
 	public function getInputField(ilPropertyFormGUI $form, $record_id = 0) {
 		$input = new ilDateDurationInputGUI($this->getField()->getTitle(), 'field_' . $this->getField()->getId());
 		$input->enableToggleFullTime($this->pl->txt('whole_day'), $_POST[$input->getPostVar()]['tgl']);
-		$input->setMinuteStepSize(15);
+//		$input->setMinuteStepSize(1);
 		$input->setShowTime(!$_POST[$input->getPostVar()]['tgl']);
 		$this->setupInputField($input, $this->field);
 
