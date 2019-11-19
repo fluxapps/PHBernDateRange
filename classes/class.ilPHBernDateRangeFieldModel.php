@@ -42,15 +42,39 @@ class ilPHBernDateRangeFieldModel extends ilDclDatetimeFieldModel {
 			. $ilDB->quote($this->getId(), 'integer') . ") ";
 		$join_str .= "INNER JOIN il_dcl_stloc{$this->getStorageLocation()}_value AS filter_stloc_{$this->getId()} ON (filter_stloc_{$this->getId()}.record_field_id = filter_record_field_{$this->getId()}.id ";
 		if ($date_from) {
-			$join_str .= "AND UNIX_TIMESTAMP(SUBSTRING(filter_stloc_{$this->getId()}.value,11,10)) >= " . $ilDB->quote($date_from->getUnixTime(), 'integer') . " ";
+			$join_str .= "AND UNIX_TIMESTAMP(STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(filter_stloc_{$this->getId()}.value,'$.start')), '%d.%m.%Y %H:%i')) >= " . $ilDB->quote($date_from->getUnixTime(), 'integer') . " ";
 		}
 		if ($date_to) {
-			$join_str .= "AND UNIX_TIMESTAMP(SUBSTRING(filter_stloc_{$this->getId()}.value,11,10)) <= " . $ilDB->quote($date_to->getUnixTime(), 'integer') . " ";
+			$join_str .= "AND UNIX_TIMESTAMP(STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(filter_stloc_{$this->getId()}.value,'$.end')), '%d.%m.%Y %H:%i')) <= " . $ilDB->quote($date_to->getUnixTime(), 'integer') . " ";
 		}
 		$join_str .= ") ";
 
 		$sql_obj = new ilDclRecordQueryObject();
 		$sql_obj->setJoinStatement($join_str);
+
+		return $sql_obj;
+	}
+
+	/**
+	 * @param string $direction
+	 * @param bool $sort_by_status
+	 * @return ilDclRecordQueryObject
+	 */
+	public function getRecordQuerySortObject($direction = "asc", $sort_by_status = false) {
+		global $DIC;
+		$ilDB = $DIC['ilDB'];
+
+		$sql_obj = new ilDclRecordQueryObject();
+
+		$select_str = "UNIX_TIMESTAMP(STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(sort_stloc_{$this->getId()}.value,'$.start')), '%d.%m.%Y %H:%i')) AS field_{$this->getId()}";
+		$join_str
+			= "LEFT JOIN il_dcl_record_field AS sort_record_field_{$this->getId()} ON (sort_record_field_{$this->getId()}.record_id = record.id AND sort_record_field_{$this->getId()}.field_id = "
+			. $ilDB->quote($this->getId(), 'integer') . ") ";
+		$join_str .= "LEFT JOIN il_dcl_stloc{$this->getStorageLocation()}_value AS sort_stloc_{$this->getId()} ON (sort_stloc_{$this->getId()}.record_field_id = sort_record_field_{$this->getId()}.id)";
+
+		$sql_obj->setSelectStatement($select_str);
+		$sql_obj->setJoinStatement($join_str);
+		$sql_obj->setOrderStatement("field_{$this->getId()} {$direction}");
 
 		return $sql_obj;
 	}

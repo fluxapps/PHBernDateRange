@@ -41,8 +41,8 @@ class ilPHBernDateRangeRecordRepresentation extends ilDclDatetimeRecordRepresent
 	 * @return false|string
 	 */
 	protected function formatDateTimes(array $values) {
-		if (count($values) != 2) {
-			throw new ilDclException('Wrong number of dates given for fieldtype daterange: should be 2');
+		if (!$values['start'] || !$values['end']) {
+			throw new ilDclException('start and/or end not set for field type DateRange: ' . print_r($values, true));
 		}
 
 		$date_from = ilPHBernDateRangePlugin::formatDate($values['start']);
